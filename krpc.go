@@ -3,6 +3,7 @@ package dht
 import (
 	"bytes"
 	"crypto/rand"
+	"encoding/base32"
 	"encoding/hex"
 	"expvar"
 	"fmt"
@@ -10,8 +11,8 @@ import (
 	"strconv"
 	"time"
 
-	bencode "github.com/jackpal/bencode-go"
 	log "github.com/golang/glog"
+	bencode "github.com/jackpal/bencode-go"
 	"github.com/nictuku/nettools"
 )
 
@@ -263,7 +264,10 @@ func DecodeInfoHash(x string) (b InfoHash, err error) {
 	var h []byte
 	h, err = hex.DecodeString(x)
 	if len(h) != 20 {
-		return "", fmt.Errorf("DecodeInfoHash: expected InfoHash len=20, got %d", len(h))
+		h, err = base32.StdEncoding.DecodeString(x)
+		if len(h) != 20 {
+			return "", fmt.Errorf("DecodeInfoHash: expected InfoHash len=20, got %d", len(h))
+		}
 	}
 	return InfoHash(h), err
 }
